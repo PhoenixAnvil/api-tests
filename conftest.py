@@ -9,7 +9,7 @@ import httpx
 from typing import Generator, Any
 
 # Base URL for the API - can be overridden via environment variable
-BASE_URL = "http://127.0.0.1:8081"
+BASE_URL = "https://jas-demo-api-c4hehfg8h3hye8ap.centralus-01.azurewebsites.net/"
 
 
 @pytest.fixture(scope="session")
