@@ -1,0 +1,8 @@
+[tool.ruff]
+line-length = 72
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]  # basic: pycodestyle/pyflakes/imports
+
+[tool.ruff.format]
+quote-style = "double"

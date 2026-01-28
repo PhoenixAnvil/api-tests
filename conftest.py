@@ -1,15 +1,21 @@
 """
 API-SUT Test Configuration and Fixtures
 
-This module contains pytest fixtures and configuration for the API-SUT test suite.
+This module contains pytest fixtures and configuration for
+the API-SUT test suite.
 """
 
-import pytest
+import os
+from typing import Any, Generator
+
 import httpx
-from typing import Generator, Any
+import pytest
 
 # Base URL for the API - can be overridden via environment variable
-BASE_URL = "https://jas-demo-api-c4hehfg8h3hye8ap.centralus-01.azurewebsites.net/"
+BASE_URL = os.getenv(
+    "API_SUT_BASE_URL",
+    "https://jas-demo-api-c4hehfg8h3hye8ap.centralus-01.azurewebsites.net/",
+)
 
 
 @pytest.fixture(scope="session")
@@ -19,13 +25,13 @@ def base_url() -> str:
 
 
 @pytest.fixture(scope="session")
-def client() -> Generator[httpx.Client, None, None]:
+def client(base_url: str) -> Generator[httpx.Client, None, None]:
     """
     Create an HTTP client for making API requests.
-    
+
     This fixture is session-scoped for efficiency across all tests.
     """
-    with httpx.Client(base_url=BASE_URL, timeout=30.0) as client:
+    with httpx.Client(base_url=base_url, timeout=30.0) as client:
         yield client
 
 
@@ -36,38 +42,36 @@ def valid_item_payload() -> dict[str, Any]:
         "name": "Test Item",
         "description": "A test item for automated testing",
         "price": 19.99,
-        "quantity": 50
+        "quantity": 50,
     }
 
 
 @pytest.fixture
 def minimal_valid_payload() -> dict[str, Any]:
     """Return a minimal valid payload (only required fields)."""
-    return {
-        "name": "Minimal Item",
-        "price": 1.00,
-        "quantity": 0
-    }
+    return {"name": "Minimal Item", "price": 1.00, "quantity": 0}
 
 
 @pytest.fixture
-def create_test_item(client: httpx.Client, valid_item_payload: dict[str, Any]):
+def create_test_item(
+    client: httpx.Client, valid_item_payload: dict[str, Any]
+):
     """
     Factory fixture to create a test item and return its data.
-    
+
     Automatically cleans up after the test by deleting the created item.
     """
     created_items = []
-    
+
     def _create_item(payload: dict[str, Any] = None) -> dict[str, Any]:
         data = payload or valid_item_payload
         response = client.post("/items", json=data)
         item = response.json()
         created_items.append(item["id"])
         return item
-    
+
     yield _create_item
-    
+
     # Cleanup: delete all created items
     for item_id in created_items:
         try:
@@ -84,18 +88,18 @@ def sample_items() -> list[dict[str, Any]]:
             "name": "Sample Item 1",
             "description": "First sample item",
             "price": 10.00,
-            "quantity": 100
+            "quantity": 100,
         },
         {
             "name": "Sample Item 2",
             "description": "Second sample item",
             "price": 25.50,
-            "quantity": 200
+            "quantity": 200,
         },
         {
             "name": "Sample Item 3",
             "description": "Third sample item",
             "price": 99.99,
-            "quantity": 50
-        }
+            "quantity": 50,
+        },
     ]
